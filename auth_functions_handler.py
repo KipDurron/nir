@@ -1,14 +1,8 @@
-import telegram
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
-from telegram.ext import Updater
-from telegram.ext import CommandHandler
-from telegram.ext import MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
-
-from sbcloud_helper import sbcloud_req_res
-
-AUTH, SELECTING_ACTION, TYPING, LOGIN, PASSWORD, CURRENT_AUTH_DATA, AUTH_DATA, START_OVER, SUCCESS_AUTH, ERROR_AUTH = map(chr, range(10))
-END = ConversationHandler.END
-
+from sbcloud_helper import sbcloud_req_res, get_headers_by_auth_resp
+from states.auth_states import *
+from states.common_states import *
+from states.create_project_states import CREATE_PROJECT
 
 def start(update, context):
     reply_keyboard = [['Да','Нет']]
@@ -29,7 +23,10 @@ def start_auth(update, context):
         InlineKeyboardButton(text='Готово', callback_data=str(END))
     ]]
     keyboard = InlineKeyboardMarkup(buttons)
-    update.message.reply_text(text=text, reply_markup=keyboard)
+    if update.message is None:
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    else:
+        update.message.reply_text(text=text, reply_markup=keyboard)
     if not context.user_data.get(START_OVER):
         context.user_data[AUTH_DATA] = {}
     context.user_data[START_OVER] = False
@@ -48,8 +45,11 @@ def save_input(update, context):
     return start_auth(update, context)
 
 def stop(update, context):
-    user = update.message.from_user
-    update.message.reply_text('Пока!', reply_markup=ReplyKeyboardRemove())
+    text = 'Пока!'
+    if update.message is None:
+        update.callback_query.edit_message_text(text=text)
+    else:
+        update.message.reply_text(text=text, reply_markup=ReplyKeyboardRemove())
     return END
 
 
@@ -61,10 +61,20 @@ def req_auth_to_sbcloud(update, context):
     ud = context.user_data
     response = sbcloud_req_res(ud[AUTH_DATA][LOGIN], ud[AUTH_DATA][PASSWORD])
     if response.status_code == 200:
+        ud[HEDEARS] = get_headers_by_auth_resp(response)
         text = 'Авторизация прошла успешна'
-        result = SUCCESS_AUTH
+        buttons = [[
+            InlineKeyboardButton(text='Создать проект', callback_data=str(CREATE_PROJECT)),
+            InlineKeyboardButton(text='Авторизация', callback_data=str(REPEAT_AUTH)),
+            InlineKeyboardButton(text='Выход', callback_data=str(END))
+        ]]
+        keyboard = InlineKeyboardMarkup(buttons)
     else:
         text = 'Авторизация не выполнена код ошибки:' + str(response.status_code)
-        result = ERROR_AUTH
-    update.callback_query.edit_message_text(text=text)
-    return result
+        buttons = [[
+            InlineKeyboardButton(text='Авторизация', callback_data=str(REPEAT_AUTH)),
+            InlineKeyboardButton(text='Выход', callback_data=str(END))
+        ]]
+        keyboard = InlineKeyboardMarkup(buttons)
+    update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    return RESULT_AUTH
