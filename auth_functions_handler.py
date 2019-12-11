@@ -18,9 +18,9 @@ def start(update, context):
 def start_auth(update, context):
     text = 'Введите свой логин и пароль'
     buttons = [[
-        InlineKeyboardButton(text='Ввести логин', callback_data=str(LOGIN)),
-        InlineKeyboardButton(text='Ввести пароль', callback_data=str(PASSWORD)),
-        InlineKeyboardButton(text='Готово', callback_data=str(END))
+        InlineKeyboardButton(text='Логин', callback_data=str(LOGIN)),
+        InlineKeyboardButton(text='Пароль', callback_data=str(PASSWORD)),
+        InlineKeyboardButton(text='Отправить', callback_data=str(END))
     ]]
     keyboard = InlineKeyboardMarkup(buttons)
     if update.message is None:

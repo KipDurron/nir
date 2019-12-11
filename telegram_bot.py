@@ -4,7 +4,7 @@ from telegram.utils.request import Request
 import conversation_helper
 
 TOKEN = '972067680:AAH9Z7H5-u3XylOqG6RRvyj2m5j5JejQK68'
-PROXY = 'socks5://208.113.154.54:50827'
+PROXY = 'socks5://61.41.9.213:1081'
 
 def start_telegram_bot():
     kwargs= {}

@@ -24,13 +24,14 @@ def first_auth_conversation():
 
 def create_project_conversation():
     return ConversationHandler(
-        entry_points=[CallbackQueryHandler(create_project_functions_handler.show, pattern='^' + str(CREATE_PROJECT) + '$')],
+        entry_points=[CallbackQueryHandler(create_project_functions_handler.start_create_project, pattern='^' + str(CREATE_PROJECT) + '$')],
         states={
-            SELECTING_ACTION: [MessageHandler(Filters.regex('^Да$'), auth_functions_handler.start_auth),
-                               MessageHandler(Filters.regex('^Нет$'), auth_functions_handler.stop_auth)],
-            AUTH: [CallbackQueryHandler(auth_functions_handler.ask_for_input, pattern='^(?!' + str(END) + ').*$'),
-                   CallbackQueryHandler(auth_functions_handler.req_auth_to_sbcloud, pattern='^' + str(END) + '.*$')],
-            TYPING: [MessageHandler(Filters.text, auth_functions_handler.save_input)],
+            CREATE_PROJECT: [CallbackQueryHandler(create_project_functions_handler.ask_for_input, pattern='^' + str(PROJECT_NAME) + '$'),
+                             CallbackQueryHandler(create_project_functions_handler.req_create_project_to_sbcloud, pattern='^' + str(END) + '.*$')],
+            TYPING: [MessageHandler(Filters.text, create_project_functions_handler.save_input)],
+            RESULT_OPERATION: [
+                         CallbackQueryHandler(create_project_functions_handler.start_create_project, pattern='^' + str(CREATE_PROJECT) + '$'),
+                         CallbackQueryHandler(auth_functions_handler.stop, pattern='^' + str(END) + '$')],
         },
 
         fallbacks=[CommandHandler('stop', auth_functions_handler.stop)]
