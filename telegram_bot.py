@@ -1,7 +1,7 @@
 import telegram
 from telegram.ext import Updater
 from telegram.utils.request import Request
-import conversation_helper
+from core.conversation import conversation_helper
 
 TOKEN = '972067680:AAH9Z7H5-u3XylOqG6RRvyj2m5j5JejQK68'
 PROXY = 'socks5://61.41.9.213:1081'

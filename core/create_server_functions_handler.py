@@ -1,9 +1,43 @@
-from states.common_states import *
 from states.create_project_states import *
+from states.virtual_server_srates import *
 from states.common_states import *
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
-from  sbcloud_helper import *
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup)
+from sbcloud.sbcloud_helper import *
 
+
+def create_vdpc(update, context):
+    ud = context.user_data
+    ud[CONTRACT_ID] = get_contract_id(ud[HEDEARS])
+    ud[PLAN_ID] = get_plan_id(ud[HEDEARS], ud[CONTRACT_ID])
+    if update.callback_query.data == VM_WARE:
+        hypervisor_id = 'vsphere'
+    else:
+        hypervisor_id = 'openstack'
+    ud[VDPC] = {
+        'hypervisor_id': hypervisor_id,
+        'create_immediately': True,
+        'name': 'vsphere VDC for project' + str(ud[PROJECT_ID]),
+        'project_id': ud[PROJECT_ID],
+        'contract_id': ud[CONTRACT_ID],
+        'org_id': str(ud[ORG_ID]),
+        'plan_id': ud[PLAN_ID],
+        'rts_status': "pending",
+        'rts_type': "vdc"
+    }
+    response = sbcloud_create_vdpc(ud[VDPC], ud[HEDEARS])
+    if response.status_code == 200:
+        text = "ВЦОД был успешно создан"
+        buttons = [[
+            InlineKeyboardButton(text='+ Верт.сервер', callback_data=str(START_VERTUAL_SERVER))
+        ]]
+    else:
+        text = "ВЦОД не был создан код ошибки:" + str(response.status_code)
+        buttons = [[
+            InlineKeyboardButton(text='Ещё раз', callback_data=str(FAIL)),
+            InlineKeyboardButton(text='Выйти', callback_data=str(END))
+        ]]
+    update.callback_query.edit_message_text(text=text)
+    return RESULT_CREATE_VDPC
 
 def start_create_project(update, context):
     buttons = [[
@@ -41,7 +75,7 @@ def req_create_project_to_sbcloud(update, context):
     if response.status_code == 200:
         text = 'Проект успешно создан'
         buttons = [[
-            InlineKeyboardButton(text='Создать ВЦОД', callback_data=str(CREATE_VDPC)),
+            InlineKeyboardButton(text='ВЦОД VMware', callback_data=str(VM_WARE)),
         ]]
         keyboard = InlineKeyboardMarkup(buttons)
 

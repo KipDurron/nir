@@ -1,5 +1,5 @@
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
-from sbcloud_helper import sbcloud_req_res, get_headers_by_auth_resp
+from sbcloud.sbcloud_helper import sbcloud_req_res, get_headers_by_auth_resp
 from states.auth_states import *
 from states.common_states import *
 from states.create_project_states import CREATE_PROJECT
