@@ -4,7 +4,8 @@ from states.auth_states import *
 from states.common_states import *
 from states.create_project_states import *
 from states.virtual_server_srates import *
-from core import auth_functions_handler, create_project_functions_handler, create_server_functions_handler
+from core.functions_handler import auth_functions_handler, create_project_functions_handler, \
+    create_server_functions_handler
 
 
 def first_auth_conversation():
