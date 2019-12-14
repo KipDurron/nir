@@ -1,7 +1,7 @@
 from states.create_project_states import *
 from states.virtual_server_srates import *
 from states.common_states import *
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup)
 from sbcloud.sbcloud_helper import *
 
 def start_dialog_vdpc(update, context):
@@ -71,11 +71,11 @@ def construct_server_conf(ud):
     ud[ALL_ROUTERS] = get_all_routers(ud[HEDEARS])
     ud[ALL_OS] = get_all_os(ud[HEDEARS])
     ud[ALL_DISKS] = get_all_disk(ud[HEDEARS])
-    {"name": "server", "configuration": {"cpu": 2, "cores_per_socket": 2, "memory": 2048,
-                                         "networks": [{"network_id": 433345, "auto_floating": false,
-                                                       "fixed_ips": [{"subnet_id": 433347}]}],
-                                         "disks": [{"size": 50, "profile_id": 291}]}, "flavor_id": 0,
-     "security_groups": [], "os_id": 20017, "is_vmtemplate": false, "software": [20016]}
+    # {"name": "server", "configuration": {"cpu": 2, "cores_per_socket": 2, "memory": 2048,
+    #                                      "networks": [{"network_id": 433345, "auto_floating": false,
+    #                                                    "fixed_ips": [{"subnet_id": 433347}]}],
+    #                                      "disks": [{"size": 50, "profile_id": 291}]}, "flavor_id": 0,
+    #  "security_groups": [], "os_id": 20017, "is_vmtemplate": false, "software": [20016]}
     ud[SERVER_CONF] = {
         "name": None,
         "configuration": {
@@ -83,58 +83,140 @@ def construct_server_conf(ud):
             "cores_per_socket": None,
             "memory": None,
             "networks": [],
-            "disks": [],
-            "flavor_id": 0
+            "disks": []
         }
+        ,"flavor_id": 0
+        ,"security_groups": [],
+        "os_id": None,
+        "is_vmtemplate": False,
+        "software": None
     }
 
 
 def start_create_vm_ware_server(update, context):
     buttons = [[
-        InlineKeyboardButton(text='Название', callback_data=str(PROJECT_NAME)),
-        InlineKeyboardButton(text='Отправить', callback_data=str(END))
+        InlineKeyboardButton(text='Название', callback_data=str(SERVER_NAME)),
+        InlineKeyboardButton(text='CPU', callback_data=str(CPU)),
+        InlineKeyboardButton(text='RAM', callback_data=str(RAM))],
+        [InlineKeyboardButton(text='+ Диск', callback_data=str(DISK)),
+        InlineKeyboardButton(text='Сеть', callback_data=str(NETWORK)),
+        InlineKeyboardButton(text='О.С.', callback_data=str(OS))],
+        [InlineKeyboardButton(text='Просмотреть', callback_data=str(SHOWING)),
+        InlineKeyboardButton(text='Отправить', callback_data=str(SEND))
     ]]
     keyboard = InlineKeyboardMarkup(buttons)
+    text = 'Настройте сервер'
     if update.message is None:
-        text = 'Напишите название проекта'
         update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        text = 'Отправте результат'
         update.message.reply_text(text=text, reply_markup=keyboard)
-    if not context.user_data.get(START_OVER):
-        context.user_data[CREATE_PROJECT_DATA] = {}
-    return CREATE_PROJECT
+
+    return CONFIG_SERVER
+
+def valid_number(first, last, number):
+    try:
+        val = int(number)
+        if val < first:
+            return False
+        if val > last:
+            return False
+        else:
+            return True
+
+    except ValueError:
+        return False
 
 def ask_for_input(update, context):
-    context.user_data[CURRENT_ATTRIBUTE] = update.callback_query.data
-    text = 'Напишите.'
+    ud = context.user_data
+    ud[CURRENT_ATTRIBUTE] = update.callback_query.data
+    current_attribute = ud[CURRENT_ATTRIBUTE]
+    if current_attribute == SERVER_NAME:
+        text = 'Напишите название сервера.'
+    elif current_attribute == CPU:
+        text = 'Укажите CPU сервера, допустимы натуральные числа от 1 до 32 ядер.'
+    elif current_attribute == RAM:
+        text = 'Укажите RAM сервера, допустимы натуральные числа от 1 до 132 Гб.'
+    else:
+        text = 'Напишите.'
     update.callback_query.edit_message_text(text=text)
-    return TYPING
+    return SAVE_INPUT
 
+#    ud[SERVER_CONF] = {
+#         "name": None,
+#         "configuration": {
+#             "cpu": None,
+#             "cores_per_socket": None,
+#             "memory": None,
+#             "networks": [],
+#             "disks": []
+#         }
+#         ,"flavor_id": 0
+#         ,"security_groups": [],
+#         "os_id": None,
+#         "is_vmtemplate": False,
+#         "software": None
+#     }
 
 def save_input(update, context):
     ud = context.user_data
-    ud[CREATE_PROJECT_DATA][ud[CURRENT_ATTRIBUTE]] = update.message.text
-    ud[START_OVER] = True
+    current_attribute = ud[CURRENT_ATTRIBUTE]
+    input = update.message.text
+    if current_attribute == SERVER_NAME:
+        ud[SERVER_CONF]["name"] = input
+    elif current_attribute == CPU:
+        if valid_number(1, 32, input):
+            ud[SERVER_CONF]["configuration"]["cpu"] = input
+            ud[SERVER_CONF]["configuration"]["cores_per_socket"] = input
+        else:
+            ud[ERROR_MSG] = 'CPU не сохранён, допустимы натуральные числа от 1 до 32 ядер'
+
+    elif current_attribute == RAM:
+        if valid_number(1, 132, input):
+            ud[SERVER_CONF]["configuration"]["memory"] = input
+        else:
+            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 Гб'
+    if context.user_data.get(ERROR_MSG):
+        show_error(ud[ERROR_MSG], update)
+        context.user_data[ERROR_MSG] = False
     return start_create_vm_ware_server(update, context)
 
+def show_error(error_msg, update):
+    text = error_msg
+    update.message.reply_text(text=text)
 
-def req_create_project_to_sbcloud(update, context):
+
+
+def req_create_server_to_sbcloud(update, context):
     ud = context.user_data
-    response = sbcloud_create_project(ud[CREATE_PROJECT_DATA][PROJECT_NAME], ud[HEDEARS])
-    if response.status_code == 200:
-        text = 'Проект успешно создан'
-        buttons = [[
-            InlineKeyboardButton(text='ВЦОД VMware', callback_data=str(VM_WARE)),
-        ]]
-        keyboard = InlineKeyboardMarkup(buttons)
-
+    server_conf = ud[SERVER_CONF]
+    if valid_server_conf(server_conf):
+        response = sbcloud_create_server(server_conf, ud[HEDEARS])
+        if response.status_code == 200:
+            text = 'Сервер успешно создан, пока'
+            buttons = [[
+                InlineKeyboardButton(text='Выход', callback_data=str(END)),
+            ]]
+        else:
+            text = 'Сервер не был создан код ошибки:' + str(response.status_code)
+            buttons = [[
+                InlineKeyboardButton(text='Исправить', callback_data=str(REPEAT_OPERATION)),
+                InlineKeyboardButton(text='Выход', callback_data=str(END))
+            ]]
     else:
-        text = 'Проект не был создан код ошибки:' + str(response.status_code)
+        text = 'Не все поля заполнены'
         buttons = [[
-            InlineKeyboardButton(text='Создать проект', callback_data=str(CREATE_PROJECT)),
+            InlineKeyboardButton(text='Исправить', callback_data=str(REPEAT_OPERATION)),
             InlineKeyboardButton(text='Выход', callback_data=str(END))
         ]]
-        keyboard = InlineKeyboardMarkup(buttons)
+    keyboard = InlineKeyboardMarkup(buttons)
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     return RESULT_OPERATION
+
+def valid_server_conf(server_conf):
+    if server_conf["name"] is None or server_conf["configuration"]["cpu"] is None or server_conf["configuration"]["memory"] \
+        or server_conf["os_id"] is None or server_conf["is_vmtemplate"] is None or server_conf["software"] is None:
+        return False
+    else:
+        return True
+
+

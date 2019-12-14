@@ -127,6 +127,11 @@ def get_all_disk(headers):
     response = session.get('https://' + HOSTNAME + '/api/storage_profile?enabled=true', headers=headers, verify=False)
     return json.loads(response.text)
 
+def sbcloud_create_server(server_conf, headers):
+    session = requests.Session()
+    return session.post('https://' + HOSTNAME + '/api/instance', json=server_conf, headers= headers, verify=False)
+
+
 def testCreateProject():
     session = requests.Session()
     headers = get_headers_by_auth_resp(sbcloud_req_res('ishunin97@gmail.com', '8921414go'))
@@ -148,6 +153,11 @@ def testCreateProject():
     response_network = sbcloud_create_network(headers)
     response_tenant = sbcloud_response_tenant(tenant_id, headers)
     resp_router = sbcloud_create_router(get_network_id(response_network), headers)
+
+    all_networks = get_all_networks(headers)
+    all_routers = get_all_routers(headers)
+    all_os = get_all_os(headers)
+    all_disk = get_all_disk(headers)
 
     return resp_create_VDPC
 
