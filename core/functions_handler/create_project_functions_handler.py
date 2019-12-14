@@ -44,6 +44,7 @@ def req_create_project_to_sbcloud(update, context):
         ud[ORG_ID] = get_field_from_response_project(response, 'org_id')
         buttons = [[
             InlineKeyboardButton(text='+ ВЦОД VMware', callback_data=str(VM_WARE)),
+            InlineKeyboardButton(text='+ ВЦОД KVM', callback_data=str(VM_WARE))
         ]]
         keyboard = InlineKeyboardMarkup(buttons)
 

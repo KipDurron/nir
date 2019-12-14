@@ -43,10 +43,14 @@ def create_project_conversation():
 
 def create_server_conversation():
     return ConversationHandler(
-        entry_points=[CallbackQueryHandler(create_server_functions_handler.create_vdpc, pattern='^' + str(VM_WARE) + '$')],
+        entry_points=[CallbackQueryHandler(create_server_functions_handler.create_vdpc, pattern='^' + str(VM_WARE) + '$|^' + str(KVM) + '$')],
         states={
-            CREATE_PROJECT: [CallbackQueryHandler(create_project_functions_handler.ask_for_input, pattern='^' + str(PROJECT_NAME) + '$'),
-                             CallbackQueryHandler(create_project_functions_handler.req_create_project_to_sbcloud, pattern='^' + str(END) + '.*$')],
+            START_CREATE_VDPC: [CallbackQueryHandler(create_server_functions_handler.create_vdpc, pattern='^' + str(VM_WARE) + '$|^' + str(KVM) + '$')],
+            RESULT_CREATE_VDPC: [
+                         CallbackQueryHandler(create_server_functions_handler.start_create_vm_ware_server, pattern='^' + str(START_VM_WARE_SERVER) + '$'),
+                         CallbackQueryHandler(auth_functions_handler.stop, pattern='^' + str(END) + '$'),
+                         CallbackQueryHandler(create_server_functions_handler.start_dialog_vdpc, pattern='^' + str(REPLAY) + '$')],
+
             TYPING: [MessageHandler(Filters.text, create_project_functions_handler.save_input)],
             RESULT_OPERATION: [
                          CallbackQueryHandler(create_project_functions_handler.start_create_project, pattern='^' + str(START_VERTUAL_SERVER) + '$'),
