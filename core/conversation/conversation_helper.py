@@ -6,6 +6,7 @@ from states.create_project_states import *
 from states.virtual_server_srates import *
 from core.functions_handler import auth_functions_handler, create_project_functions_handler, \
     create_server_functions_handler, add_disk_functions_handler
+from sbcloud.sbcloud_helper import get_all_disk, get_pattern_disks
 
 
 def first_auth_conversation():
@@ -54,7 +55,10 @@ def create_server_conversation():
 
             CONFIG_SERVER: [CallbackQueryHandler(create_server_functions_handler.ask_for_input, pattern='^' + str(SERVER_NAME) + '$|^' + str(CPU) + '$' + '$|^' + str(RAM) + '$'),
                             add_disk_conversation(),
-                            CallbackQueryHandler(create_server_functions_handler.req_create_server_to_sbcloud, pattern='^' + str(SEND) + '$')],
+                            CallbackQueryHandler(create_server_functions_handler.req_create_server_to_sbcloud, pattern='^' + str(SEND) + '$'),
+                            CallbackQueryHandler(create_server_functions_handler.show_conf_server, pattern='^' + str(SHOWING) + '$')],
+            SHOWING:[ CallbackQueryHandler(create_server_functions_handler.start_create_vm_ware_server, pattern='^' + str(BACK) + '$')],
+
 
             SAVE_INPUT: [MessageHandler(Filters.text, create_server_functions_handler.save_input)],
 
@@ -70,13 +74,21 @@ def add_disk_conversation():
     return ConversationHandler(
         entry_points=[CallbackQueryHandler(add_disk_functions_handler.start_create_disk, pattern='^' + str(DISK) + '$')],
         states={
-            CREATE_DISK: [CallbackQueryHandler(create_project_functions_handler.ask_for_input, pattern='^' + str(PROJECT_NAME) + '$'),
-                             CallbackQueryHandler(create_project_functions_handler.req_create_project_to_sbcloud, pattern='^' + str(END) + '.*$')],
-            # TYPING: [MessageHandler(Filters.text, create_project_functions_handler.save_input)],
-            # RESULT_OPERATION: [create_server_conversation(),
-            #                    CallbackQueryHandler(create_project_functions_handler.start_create_project, pattern='^' + str(CREATE_PROJECT) + '$'),
-            #                    CallbackQueryHandler(auth_functions_handler.stop, pattern='^' + str(END) + '$')],
+            CREATE_DISK: [CallbackQueryHandler(add_disk_functions_handler.select_type_disk, pattern='^' + str(TYPE_DISK) + '$'),
+                          CallbackQueryHandler(add_disk_functions_handler.ask_for_input, pattern='^' + str(MEMORY_DISK) + '$'),
+                          CallbackQueryHandler(add_disk_functions_handler.save_disk, pattern='^' + str(SEND) + '$'),
+                          ],
+            SAVE_DISK: [CallbackQueryHandler(add_disk_functions_handler.save_type_disk),
+                        MessageHandler(Filters.text, add_disk_functions_handler.save_memory)],
+
+            RESULT_OPERATION: [CallbackQueryHandler(add_disk_functions_handler.start_create_disk, pattern='^' + str(FAIL) + '$')]
         },
 
-        fallbacks=[CommandHandler('stop', auth_functions_handler.stop)]
+        fallbacks=[CommandHandler('stop', auth_functions_handler.stop),
+                   CallbackQueryHandler(add_disk_functions_handler.back_to_conf_server, pattern='^' + str(BACK) + '$'),
+                   CommandHandler('skip', add_disk_functions_handler.start_create_disk),],
+
+        map_to_parent={
+            BACK: CONFIG_SERVER,
+        }
     )

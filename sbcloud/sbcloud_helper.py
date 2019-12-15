@@ -131,6 +131,10 @@ def sbcloud_create_server(server_conf, headers):
     session = requests.Session()
     return session.post('https://' + HOSTNAME + '/api/instance', json=server_conf, headers= headers, verify=False)
 
+def get_pattern_disks(disks):
+    disks = disks["storage_profiles"]
+    result = '|'.join(map(lambda disk: str(disk['id']), disks))
+    return result
 
 def testCreateProject():
     session = requests.Session()
@@ -158,7 +162,11 @@ def testCreateProject():
     all_routers = get_all_routers(headers)
     all_os = get_all_os(headers)
     all_disk = get_all_disk(headers)
-
+    buttons = [[]]
+    text = 'Выберите тип диска'
+    for disk in all_disk["storage_profiles"]:
+        buttons[0].append(str(disk['name'])  +str(disk['id']))
+    pattern = get_pattern_disks(all_disk)
     return resp_create_VDPC
 
 # testCreateProject()

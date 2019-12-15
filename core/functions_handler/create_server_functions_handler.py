@@ -93,6 +93,16 @@ def construct_server_conf(ud):
     }
 
 
+def show_conf_server(update, context):
+    ud = context.user_data
+    text = str(ud[SERVER_CONF])
+    buttons = [[
+        InlineKeyboardButton(text='Назад', callback_data=str(BACK)),
+         ]]
+    keyboard = InlineKeyboardMarkup(buttons)
+    update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    return SHOWING
+
 def start_create_vm_ware_server(update, context):
     buttons = [[
         InlineKeyboardButton(text='Название', callback_data=str(SERVER_NAME)),
@@ -168,13 +178,13 @@ def save_input(update, context):
             ud[SERVER_CONF]["configuration"]["cpu"] = input
             ud[SERVER_CONF]["configuration"]["cores_per_socket"] = input
         else:
-            ud[ERROR_MSG] = 'CPU не сохранён, допустимы натуральные числа от 1 до 32 ядер'
+            ud[ERROR_MSG] = 'CPU не сохранён, допустимы натуральные числа от 1 до 32 (ядера)'
 
     elif current_attribute == RAM:
         if valid_number(1, 132, input):
             ud[SERVER_CONF]["configuration"]["memory"] = input
         else:
-            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 Гб'
+            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 (Гб)'
     if context.user_data.get(ERROR_MSG):
         show_error(ud[ERROR_MSG], update)
         context.user_data[ERROR_MSG] = False
