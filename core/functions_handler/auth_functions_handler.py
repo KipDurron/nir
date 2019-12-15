@@ -7,7 +7,7 @@ from states.create_project_states import CREATE_PROJECT
 def start(update, context):
     reply_keyboard = [['Да','Нет']]
     update.message.reply_text(
-        'Привет! Меня зовут VMStarter Bot. Я помогу создать виртуальный сервер в sbcloud. '
+        'Привет! Меня зовут CloudCreator Bot. Я помогу создать виртуальный ЦОД в облаке sbcloud.ru.. '
         'Напиши /stop для выхода из диалога со мной.\n\n'
         'Вы зарегестрированны в sbcloud?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
