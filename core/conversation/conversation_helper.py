@@ -5,7 +5,7 @@ from states.common_states import *
 from states.create_project_states import *
 from states.virtual_server_srates import *
 from core.functions_handler import auth_functions_handler, create_project_functions_handler, \
-    create_server_functions_handler, add_disk_functions_handler, add_network_functions_handler
+    create_server_functions_handler, add_disk_functions_handler, add_network_os_functions_handler
 
 
 def first_auth_conversation():
@@ -55,6 +55,7 @@ def create_server_conversation():
             CONFIG_SERVER: [CallbackQueryHandler(create_server_functions_handler.ask_for_input, pattern='^' + str(SERVER_NAME) + '$|^' + str(CPU) + '$' + '$|^' + str(RAM) + '$'),
                             add_disk_conversation(),
                             add_network_conversation(),
+                            add_os_conversation(),
                             CallbackQueryHandler(create_server_functions_handler.req_create_server_to_sbcloud, pattern='^' + str(SEND) + '$'),
                             CallbackQueryHandler(create_server_functions_handler.show_conf_server, pattern='^' + str(SHOWING) + '$')],
             SHOWING:[ CallbackQueryHandler(create_server_functions_handler.start_create_vm_ware_server, pattern='^' + str(BACK) + '$')],
@@ -95,9 +96,24 @@ def add_disk_conversation():
 
 def add_network_conversation():
     return ConversationHandler(
-        entry_points=[CallbackQueryHandler(add_network_functions_handler.select_network, pattern='^' + str(NETWORK) + '$')],
+        entry_points=[CallbackQueryHandler(add_network_os_functions_handler.select_network, pattern='^' + str(NETWORK) + '$')],
         states={
-            SAVE: [CallbackQueryHandler(add_network_functions_handler.save_network)],
+            SAVE: [CallbackQueryHandler(add_network_os_functions_handler.save_network)],
+        },
+
+        fallbacks=[CommandHandler('stop', auth_functions_handler.stop),
+                   CommandHandler('skip', add_disk_functions_handler.start_create_disk),],
+
+        map_to_parent={
+            BACK: CONFIG_SERVER,
+        }
+    )
+
+def add_os_conversation():
+    return ConversationHandler(
+        entry_points=[CallbackQueryHandler(add_network_os_functions_handler.select_os, pattern='^' + str(OS) + '$')],
+        states={
+            SAVE: [CallbackQueryHandler(add_network_os_functions_handler.save_os)],
         },
 
         fallbacks=[CommandHandler('stop', auth_functions_handler.stop),

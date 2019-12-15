@@ -28,4 +28,29 @@ def save_network(update, context):
                                                      "fixed_ips": fixed_ips}]
     return back_to_conf_server(update, context)
 
+def select_os(update, context):
+    ud = context.user_data
+    all_os = ud[ALL_OS]
+    buttons = [[]]
+    text = 'Выберите О.С.'
+    for os in all_os["products"]:
+        buttons[0].append(InlineKeyboardButton(text=str(os['name']), callback_data=str(os['id'])))
+
+    keyboard = InlineKeyboardMarkup(buttons)
+    # update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    update.callback_query.edit_message_text(text=text,reply_markup=keyboard)
+    return SAVE
+
+def save_os(update, context):
+    ud = context.user_data
+    os_id = int(update.callback_query.data)
+    os = get_os_by_id(os_id, ud[ALL_OS]["products"])
+    ud[SERVER_CONF]["os_id"] = os_id
+    if not os is None:
+        software_id = get_software_id(os)
+        ud[SERVER_CONF]["software"] = [software_id]
+    else:
+        ud[SERVER_CONF]["software"] = []
+
+    return back_to_conf_server(update, context)
 

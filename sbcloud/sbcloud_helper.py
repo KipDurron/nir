@@ -68,6 +68,10 @@ def get_network_id(response):
     data = json.loads(response.text)['task']['objects'][0]
     return int("".join(filter(str.isdigit, data)))
 
+def get_router_id(response):
+    data = json.loads(response.text)['task']['objects'][0]
+    return int("".join(filter(str.isdigit, data)))
+
 
 def sbcloud_response_tenant(tenant_id, headers):
     session = requests.Session()
@@ -100,12 +104,22 @@ def sbcloud_create_router(network_id, headers):
     response = session.post('https://' + HOSTNAME + '/api/router', json=router_data, headers= headers, verify=False)
     resp_code = response.status_code
     while (resp_code == 409):
+        time.sleep(2)
         response = session.post('https://' + HOSTNAME + '/api/router', json=router_data, headers= headers, verify=False)
         resp_code = response.status_code
+    router_id = get_router_id(response)
+    res_exist_router = session.get('https://' + HOSTNAME + '/api/router?router_id=' + str(router_id), headers=headers, verify=False)
+    status_router = get_status_create_royter(res_exist_router)
+    while (status_router != 'active'):
+        res_exist_router = session.get('https://' + HOSTNAME + '/api/router?router_id=' + str(network_id), headers=headers, verify=False)
+        status_router = get_status_create_royter(res_exist_router)
     return response
 
 def get_status_create_network(respons):
     return json.loads(respons.text)["networks"][0]['status']
+
+def get_status_create_royter(respons):
+    return json.loads(respons.text)["routers"][0]['status']
 
 def get_all_networks(headers):
     session = requests.Session()
@@ -152,6 +166,14 @@ def get_fixed_ips(network):
             result.append({"subnet_id": subnet["id"]})
     return result
 
+def get_os_by_id(id, oss):
+    for os in oss:
+        if os['id'] == int(id):
+            return os
+    return None
+
+def get_software_id(os):
+    return os["software"][0]["id"]
 
 def test():
     data = json.loads('{"networks": [{"id": 433345, "name": "\u0421\u0435\u0442\u044c", "tenant_id": "433339", "status": "active", "has_internet": false, "is_default": false, "external": false, "shared": false, "ctime": "2019-12-14T18:41:07.680798+03:00", "atime": "2019-12-14T18:41:09.977734+03:00", "vlan_id": 1239, "subnets": [{"id": 433347, "name": "", "tenant_id": "433339", "cidr": "10.0.1.0/24", "ip_version": 4, "enable_dhcp": true, "gateway_ip": "10.0.1.1", "allocation_pools": [{"end": "10.0.1.254", "start": "10.0.1.2"}], "has_internet": false, "ips": [{"ip_address": "10.0.1.1", "port_id": 433351}], "ctime": "2019-12-14T18:41:09.900402+03:00", "atime": "2019-12-14T18:41:10.351668+03:00"}], "task_percent": 100.0, "task_state": null, "task_action": null}, {"id": 20006, "name": "external", "tenant_id": "admin", "status": "active", "has_internet": true, "is_default": false, "external": true, "shared": true, "ctime": "2019-03-03T18:59:25.893975+03:00", "atime": "2019-05-16T14:44:37.950295+03:00", "vlan_id": null, "subnets": [{"id": 20007, "name": "", "tenant_id": "admin", "cidr": "185.17.141.0/24", "ip_version": 4, "enable_dhcp": false, "gateway_ip": "185.17.141.1", "allocation_pools": [{"end": "185.17.141.254", "start": "185.17.141.2"}], "has_internet": false, "ips": [{"ip_address": "185.17.141.14", "port_id": 212126}, {"ip_address": "185.17.141.19", "port_id": 298318}, {"ip_address": "185.17.141.7", "port_id": 358494}, {"ip_address": "185.17.141.6", "port_id": 238119}, {"ip_address": "185.17.141.57", "port_id": 390855}, {"ip_address": "185.17.141.33", "port_id": 357731}, {"ip_address": "185.17.141.105", "port_id": 257538}, {"ip_address": "185.17.141.82", "port_id": 212806}, {"ip_address": "185.17.141.83", "port_id": 212825}, {"ip_address": "185.17.141.3", "port_id": 225208}, {"ip_address": "185.17.141.116", "port_id": 289132}, {"ip_address": "185.17.141.106", "port_id": 310150}, {"ip_address": "185.17.141.39", "port_id": 303125}, {"ip_address": "185.17.141.44", "port_id": 308211}, {"ip_address": "185.17.141.66", "port_id": 218907}, {"ip_address": "185.17.141.30", "port_id": 209051}, {"ip_address": "185.17.141.99", "port_id": 217285}, {"ip_address": "185.17.141.98", "port_id": 298629}, {"ip_address": "185.17.141.91", "port_id": 290358}, {"ip_address": "185.17.141.37", "port_id": 254248}, {"ip_address": "185.17.141.109", "port_id": 257724}, {"ip_address": "185.17.141.124", "port_id": 298974}, {"ip_address": "185.17.141.4", "port_id": 237138}, {"ip_address": "185.17.141.43", "port_id": 308556}, {"ip_address": "185.17.141.62", "port_id": 306530}, {"ip_address": "185.17.141.74", "port_id": 252547}, {"ip_address": "185.17.141.108", "port_id": 304289}, {"ip_address": "185.17.141.133", "port_id": 424061}, {"ip_address": "185.17.141.122", "port_id": 261772}, {"ip_address": "185.17.141.46", "port_id": 238951}, {"ip_address": "185.17.141.76", "port_id": 253573}, {"ip_address": "185.17.141.114", "port_id": 308752}, {"ip_address": "185.17.141.72", "port_id": 308707}, {"ip_address": "185.17.141.134", "port_id": 424139}, {"ip_address": "185.17.141.84", "port_id": 256568}, {"ip_address": "185.17.141.135", "port_id": 424170}, {"ip_address": "185.17.141.20", "port_id": 306744}, {"ip_address": "185.17.141.45", "port_id": 306763}, {"ip_address": "185.17.141.22", "port_id": 299754}, {"ip_address": "185.17.141.52", "port_id": 309172}, {"ip_address": "185.17.141.32", "port_id": 279920}, {"ip_address": "185.17.141.68", "port_id": 280149}, {"ip_address": "185.17.141.136", "port_id": 424199}, {"ip_address": "185.17.141.90", "port_id": 286718}, {"ip_address": "185.17.141.86", "port_id": 309495}, {"ip_address": "185.17.141.113", "port_id": 286984}, {"ip_address": "185.17.141.110", "port_id": 221252}, {"ip_address": "185.17.141.12", "port_id": 307186}, {"ip_address": "185.17.141.102", "port_id": 304003}, {"ip_address": "185.17.141.89", "port_id": 295132}, {"ip_address": "185.17.141.13", "port_id": 307330}, {"ip_address": "185.17.141.27", "port_id": 407316}, {"ip_address": "185.17.141.96", "port_id": 341017}, {"ip_address": "185.17.141.93", "port_id": 341472}, {"ip_address": "185.17.141.132", "port_id": 423949}, {"ip_address": "185.17.141.54", "port_id": 407771}], "ctime": "2019-03-03T18:59:26.303144+03:00", "atime": "2019-12-12T16:03:31.233916+03:00"}], "task_percent": 100.0, "task_state": null, "task_action": null}], "total": 2}')
@@ -163,7 +185,7 @@ def test():
 def testCreateProject():
     session = requests.Session()
     headers = get_headers_by_auth_resp(sbcloud_req_res('ishunin97@gmail.com', '8921414go'))
-    resp_create_prog = sbcloud_create_project("47", headers)
+    resp_create_prog = sbcloud_create_project("101", headers)
     data_VDPC = {
         'hypervisor_id': 'vsphere',
         'create_immediately': True,
@@ -193,4 +215,4 @@ def testCreateProject():
     pattern = get_pattern_disks(all_disk)
     return resp_create_VDPC
 
-# testCreateProject()
+testCreateProject()

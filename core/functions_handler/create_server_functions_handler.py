@@ -145,7 +145,7 @@ def ask_for_input(update, context):
     elif current_attribute == CPU:
         text = 'Укажите CPU сервера, допустимы натуральные числа от 1 до 32 ядер.'
     elif current_attribute == RAM:
-        text = 'Укажите RAM сервера, допустимы натуральные числа от 1 до 132 Гб.'
+        text = 'Укажите RAM сервера, допустимы натуральные числа от 1 до 132 (ГБ).'
     else:
         text = 'Напишите.'
     update.callback_query.edit_message_text(text=text)
@@ -175,16 +175,16 @@ def save_input(update, context):
         ud[SERVER_CONF]["name"] = input
     elif current_attribute == CPU:
         if valid_number(1, 32, input):
-            ud[SERVER_CONF]["configuration"]["cpu"] = input
-            ud[SERVER_CONF]["configuration"]["cores_per_socket"] = input
+            ud[SERVER_CONF]["configuration"]["cpu"] = int(input)
+            ud[SERVER_CONF]["configuration"]["cores_per_socket"] = int(input)
         else:
             ud[ERROR_MSG] = 'CPU не сохранён, допустимы натуральные числа от 1 до 32 (ядера)'
 
     elif current_attribute == RAM:
         if valid_number(1, 132, input):
-            ud[SERVER_CONF]["configuration"]["memory"] = input
+            ud[SERVER_CONF]["configuration"]["memory"] = int(input) * 1024
         else:
-            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 (Гб)'
+            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 Мб до 132 (ГБ)'
     if context.user_data.get(ERROR_MSG):
         show_error(ud[ERROR_MSG], update)
         context.user_data[ERROR_MSG] = False
@@ -201,7 +201,7 @@ def req_create_server_to_sbcloud(update, context):
     server_conf = ud[SERVER_CONF]
     if valid_server_conf(server_conf):
         response = sbcloud_create_server(server_conf, ud[HEDEARS])
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 202:
             text = 'Сервер успешно создан, пока'
             buttons = [[
                 InlineKeyboardButton(text='Выход', callback_data=str(END)),
@@ -223,7 +223,7 @@ def req_create_server_to_sbcloud(update, context):
     return RESULT_OPERATION
 
 def valid_server_conf(server_conf):
-    if server_conf["name"] is None or server_conf["configuration"]["cpu"] is None or server_conf["configuration"]["memory"] \
+    if server_conf["name"] is None or server_conf["configuration"]["cpu"] is None or server_conf["configuration"]["memory"] is None \
         or server_conf["os_id"] is None or server_conf["is_vmtemplate"] is None or server_conf["software"] is None:
         return False
     else:
