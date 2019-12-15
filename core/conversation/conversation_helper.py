@@ -5,8 +5,7 @@ from states.common_states import *
 from states.create_project_states import *
 from states.virtual_server_srates import *
 from core.functions_handler import auth_functions_handler, create_project_functions_handler, \
-    create_server_functions_handler, add_disk_functions_handler
-from sbcloud.sbcloud_helper import get_all_disk, get_pattern_disks
+    create_server_functions_handler, add_disk_functions_handler, add_network_functions_handler
 
 
 def first_auth_conversation():
@@ -55,6 +54,7 @@ def create_server_conversation():
 
             CONFIG_SERVER: [CallbackQueryHandler(create_server_functions_handler.ask_for_input, pattern='^' + str(SERVER_NAME) + '$|^' + str(CPU) + '$' + '$|^' + str(RAM) + '$'),
                             add_disk_conversation(),
+                            add_network_conversation(),
                             CallbackQueryHandler(create_server_functions_handler.req_create_server_to_sbcloud, pattern='^' + str(SEND) + '$'),
                             CallbackQueryHandler(create_server_functions_handler.show_conf_server, pattern='^' + str(SHOWING) + '$')],
             SHOWING:[ CallbackQueryHandler(create_server_functions_handler.start_create_vm_ware_server, pattern='^' + str(BACK) + '$')],
@@ -86,6 +86,21 @@ def add_disk_conversation():
 
         fallbacks=[CommandHandler('stop', auth_functions_handler.stop),
                    CallbackQueryHandler(add_disk_functions_handler.back_to_conf_server, pattern='^' + str(BACK) + '$'),
+                   CommandHandler('skip', add_disk_functions_handler.start_create_disk),],
+
+        map_to_parent={
+            BACK: CONFIG_SERVER,
+        }
+    )
+
+def add_network_conversation():
+    return ConversationHandler(
+        entry_points=[CallbackQueryHandler(add_network_functions_handler.select_network, pattern='^' + str(NETWORK) + '$')],
+        states={
+            SAVE: [CallbackQueryHandler(add_network_functions_handler.save_network)],
+        },
+
+        fallbacks=[CommandHandler('stop', auth_functions_handler.stop),
                    CommandHandler('skip', add_disk_functions_handler.start_create_disk),],
 
         map_to_parent={

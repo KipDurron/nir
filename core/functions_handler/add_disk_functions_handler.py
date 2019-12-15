@@ -44,7 +44,7 @@ def select_type_disk(update, context):
 def save_type_disk(update, context):
     ud = context.user_data
     id_disk = update.callback_query.data
-    ud[CREATE_DISK_DATA]["profile_id"] = id_disk
+    ud[CREATE_DISK_DATA]["profile_id"] = int(id_disk)
     ud[START_DISK] = True
     return start_create_disk(update, context)
 
@@ -60,7 +60,7 @@ def save_memory(update, context):
     ud = context.user_data
     memory = update.message.text
     if valid_number(50, 50000, memory):
-        ud[CREATE_DISK_DATA]["size"] = update.message.text
+        ud[CREATE_DISK_DATA]["size"] = int(update.message.text)
         ud[START_DISK] = True
     else:
         ud[ERROR_MSG] = 'Память для диска не сохранёна, допустимы натуральные числа от 50 до 50000 (Гб)'

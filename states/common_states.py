@@ -22,3 +22,4 @@ BACK = 'BACK'
 ERROR_MSG = 'ERROR_MSG'
 OK = 'OK'
 END = ConversationHandler.END
+SAVE = 'SAVE'
