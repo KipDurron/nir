@@ -215,4 +215,4 @@ def testCreateProject():
     pattern = get_pattern_disks(all_disk)
     return resp_create_VDPC
 
-testCreateProject()
+# testCreateProject()

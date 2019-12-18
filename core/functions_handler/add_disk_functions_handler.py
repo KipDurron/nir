@@ -17,7 +17,7 @@ def start_create_disk(update, context):
     text = 'Настройте диск'
     buttons = [[
         InlineKeyboardButton(text='Тип', callback_data=str(TYPE_DISK)),
-        InlineKeyboardButton(text='Память', callback_data=str(MEMORY_DISK)),
+        InlineKeyboardButton(text='Объём', callback_data=str(MEMORY_DISK)),
         InlineKeyboardButton(text='Сохранить', callback_data=str(SEND)),
         InlineKeyboardButton(text='Назад', callback_data=str(BACK)),
     ]]
@@ -63,7 +63,7 @@ def save_memory(update, context):
         ud[CREATE_DISK_DATA]["size"] = int(update.message.text)
         ud[START_DISK] = True
     else:
-        ud[ERROR_MSG] = 'Память для диска не сохранёна, допустимы натуральные числа от 50 до 50000 (Гб)'
+        ud[ERROR_MSG] = 'Объём диска не сохранён, допустимы натуральные числа от 50 до 50000 (Гб)'
         update.message.reply_text(text=ud[ERROR_MSG])
     return start_create_disk(update, context)
 

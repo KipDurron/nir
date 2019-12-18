@@ -110,7 +110,7 @@ def start_create_vm_ware_server(update, context):
         InlineKeyboardButton(text='RAM', callback_data=str(RAM))],
         [InlineKeyboardButton(text='+ Диск', callback_data=str(DISK)),
         InlineKeyboardButton(text='Сеть', callback_data=str(NETWORK)),
-        InlineKeyboardButton(text='О.С.', callback_data=str(OS))],
+        InlineKeyboardButton(text='ОС', callback_data=str(OS))],
         [InlineKeyboardButton(text='Просмотреть', callback_data=str(SHOWING)),
         InlineKeyboardButton(text='Отправить', callback_data=str(SEND))
     ]]
@@ -184,7 +184,7 @@ def save_input(update, context):
         if valid_number(1, 132, input):
             ud[SERVER_CONF]["configuration"]["memory"] = int(input) * 1024
         else:
-            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 Мб до 132 (ГБ)'
+            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 (ГБ)'
     if context.user_data.get(ERROR_MSG):
         show_error(ud[ERROR_MSG], update)
         context.user_data[ERROR_MSG] = False
