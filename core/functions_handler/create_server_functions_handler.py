@@ -53,7 +53,7 @@ def create_vdpc(update, context):
         else:
             state_button = START_KVM_SERVER
         buttons = [[
-            InlineKeyboardButton(text='+ Верт.сервер', callback_data=str(state_button))
+            InlineKeyboardButton(text='+ ВM', callback_data=str(state_button))
         ]]
     else:
         text = "ВЦОД не был создан код ошибки:" + str(response_vdpc.status_code)
