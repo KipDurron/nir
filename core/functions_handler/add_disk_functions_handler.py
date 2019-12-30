@@ -51,7 +51,7 @@ def save_type_disk(update, context):
 
 def ask_for_input(update, context):
     context.user_data[CURRENT_ATTRIBUTE] = update.callback_query.data
-    text = 'Напишите количество Гб от 50 до 50000.'
+    text = 'Укажите ёмкость диска в ГБ (от 50 до 50000).'
     update.callback_query.edit_message_text(text=text)
     return SAVE_DISK
 
@@ -63,7 +63,7 @@ def save_memory(update, context):
         ud[CREATE_DISK_DATA]["size"] = int(update.message.text)
         ud[START_DISK] = True
     else:
-        ud[ERROR_MSG] = 'Объём диска не сохранён, допустимы натуральные числа от 50 до 50000 (Гб)'
+        ud[ERROR_MSG] = 'Недопустимое значение объёма. Укажите целое число от 50 до 50000 ГБ.'
         update.message.reply_text(text=ud[ERROR_MSG])
     return start_create_disk(update, context)
 
@@ -84,14 +84,14 @@ def save_disk(update, context):
     ud = context.user_data
     disk = ud[CREATE_DISK_DATA]
     if valid_disk(disk):
-        text = 'Диск успешно добавлен'
+        text = 'Диск добавлен.'
         ud[SERVER_CONF]["configuration"]["disks"].append(disk)
         ud[START_DISK] = None
         buttons = [[
             InlineKeyboardButton(text='Назад', callback_data=str(BACK)),
         ]]
     else:
-        text = 'Диск не был добавлен, заполните все поля'
+        text = 'Диск не добавлен. Пожалуйста, заполните все поля.'
         buttons = [[
             InlineKeyboardButton(text='Повторить', callback_data=str(FAIL)),
         ]]

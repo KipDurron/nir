@@ -39,7 +39,7 @@ def req_create_project_to_sbcloud(update, context):
     ud = context.user_data
     response = sbcloud_create_project(ud[CREATE_PROJECT_DATA][PROJECT_NAME], ud[HEDEARS])
     if response.status_code == 200:
-        text = 'Проект успешно создан'
+        text = 'Проект создан'
         ud[PROJECT_ID] = get_field_from_response_project(response, 'id')
         ud[ORG_ID] = get_field_from_response_project(response, 'org_id')
         buttons = [[

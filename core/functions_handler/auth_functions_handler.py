@@ -7,9 +7,9 @@ from states.create_project_states import CREATE_PROJECT
 def start(update, context):
     reply_keyboard = [['Да','Нет']]
     update.message.reply_text(
-        'Привет! Меня зовут CloudCreator Bot. Я помогу создать виртуальный ЦОД в облаке sbcloud.ru.. '
+        'Привет! Я ваш облачный бот-инженер. Помогаю создавать и управлять виртуальными ЦОД на sbcloud.ru.'
         'Напиши /stop для выхода из диалога со мной.\n\n'
-        'Вы зарегестрированны в sbcloud?',
+        'Вы уже зарегистрированы на sbcloud.ru?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
     return SELECTING_ACTION
@@ -54,7 +54,7 @@ def stop(update, context):
 
 
 def stop_auth(update, context):
-    update.message.reply_text('Для того что бы создать виртуальный сервер необходимо зарегестрироваться на sbclod! Пока.', reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text('Для того чтобы создать виртуальный сервер необходимо зарегистрироваться на sbcloud.ru! Пока.', reply_markup=ReplyKeyboardRemove())
     return END
 
 def req_auth_to_sbcloud(update, context):

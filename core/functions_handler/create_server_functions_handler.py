@@ -38,15 +38,15 @@ def create_vdpc(update, context):
     }
     response_vdpc = sbcloud_create_vdpc(ud[VDPC], ud[HEDEARS])
     if response_vdpc.status_code == 200:
-        text = "ВЦОД был успешно создан"
+        text = "Виртуальный ЦОД был успешно создан"
         ud[TENANT_ID] = get_vdpc_tenant_id(response_vdpc)
         sbcloud_response_tenant(ud[TENANT_ID], ud[HEDEARS])
         response_network = sbcloud_create_network(ud[HEDEARS])
-        text += "\n Сеть была добавлена"
+        text += "\n Сеть добавлена"
         sbcloud_response_tenant(ud[TENANT_ID], ud[HEDEARS])
         ud[NETWORK_ID] = get_network_id(response_network)
         sbcloud_create_router(ud[NETWORK_ID], ud[HEDEARS])
-        text += "\n Роутер был добавлен"
+        text += "\n Роутер добавлен"
         construct_server_conf(ud)
         if type_vdpc == VM_WARE:
             state_button = START_VM_WARE_SERVER
@@ -141,11 +141,11 @@ def ask_for_input(update, context):
     ud[CURRENT_ATTRIBUTE] = update.callback_query.data
     current_attribute = ud[CURRENT_ATTRIBUTE]
     if current_attribute == SERVER_NAME:
-        text = 'Напишите название сервера.'
+        text = 'Укажите название сервера.'
     elif current_attribute == CPU:
-        text = 'Укажите CPU сервера, допустимы натуральные числа от 1 до 32 ядер.'
+        text = 'Задайте количество ядер процессора (от 1 до 32).'
     elif current_attribute == RAM:
-        text = 'Укажите RAM сервера, допустимы натуральные числа от 1 до 132 (ГБ).'
+        text = 'Укажите объём оперативной памяти в ГБ (от 1 до 132).'
     else:
         text = 'Напишите.'
     update.callback_query.edit_message_text(text=text)
@@ -178,13 +178,13 @@ def save_input(update, context):
             ud[SERVER_CONF]["configuration"]["cpu"] = int(input)
             ud[SERVER_CONF]["configuration"]["cores_per_socket"] = int(input)
         else:
-            ud[ERROR_MSG] = 'CPU не сохранён, допустимы натуральные числа от 1 до 32 (ядера)'
+            ud[ERROR_MSG] = 'Недопустимое значение CPU. Укажите целое число от 1 до 32.'
 
     elif current_attribute == RAM:
         if valid_number(1, 132, input):
             ud[SERVER_CONF]["configuration"]["memory"] = int(input) * 1024
         else:
-            ud[ERROR_MSG] = 'RAM не сохранён, допустимы натуральные числа от 1 до 132 (ГБ)'
+            ud[ERROR_MSG] = 'Недопустимое значение RAM. Укажите целое число от 1 до 132 ГБ.'
     if context.user_data.get(ERROR_MSG):
         show_error(ud[ERROR_MSG], update)
         context.user_data[ERROR_MSG] = False
@@ -202,7 +202,7 @@ def req_create_server_to_sbcloud(update, context):
     if valid_server_conf(server_conf):
         response = sbcloud_create_server(server_conf, ud[HEDEARS])
         if response.status_code == 200 or response.status_code == 202:
-            text = 'Сервер успешно создан, пока'
+            text = 'Сервер создан успешно'
             buttons = [[
                 InlineKeyboardButton(text='Выход', callback_data=str(END)),
             ]]
