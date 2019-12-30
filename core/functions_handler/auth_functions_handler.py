@@ -8,7 +8,7 @@ def start(update, context):
     reply_keyboard = [['Да','Нет']]
     update.message.reply_text(
         'Привет! Я ваш облачный бот-инженер. Помогаю создавать и управлять виртуальными ЦОД на sbcloud.ru.'
-        'Напиши /stop для выхода из диалога со мной.\n\n'
+        'Напишите /stop для выхода из диалога.\n\n'
         'Вы уже зарегистрированы на sbcloud.ru?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
